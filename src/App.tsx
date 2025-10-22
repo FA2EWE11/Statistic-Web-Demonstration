@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Box, Tabs, Tab, Typography, Alert, Button, Container, Paper } from '@mui/material';
+import { Box, Tabs, Tab, Typography, Alert, Button, Container, Paper, Dialog, DialogContent } from '@mui/material';
 import './App.css';
 
 // 导入数据输入组件
@@ -12,6 +12,7 @@ import { AIDataGenerator } from './components/dataInputs/AIDataGenerator';
 import { BasicStatsAnalysis } from './components/dataAnalysis/BasicStatsAnalysis';
 import { MLEMOMAnalysis } from './components/dataAnalysis/MLEMOMAnalysis';
 import { DataVisualization } from './components/DataVisualization';
+import { APIDataAnalysis } from './components/dataAnalysis/APIDataAnalysis';
 
 // 导入教学资源组件
 import TeachingResourcesMain from './components/teachingResources/TeachingResourcesMain';
@@ -20,7 +21,7 @@ import TeachingResourcesMain from './components/teachingResources/TeachingResour
 type InputMethod = 'file' | 'distribution' | 'ai';
 
 // 分析标签类型
-type AnalysisTab = 'stats' | 'mlemom' | 'visualization' | 'teaching';
+type AnalysisTab = 'stats' | 'mlemom' | 'analysis' | 'visualization' | 'teaching';
 
 // 语言类型
 type Language = 'zh' | 'en';
@@ -98,6 +99,7 @@ function App() {
         noDataMessage: '请输入数据以开始分析',
         dataInputHint: '您可以上传文件、生成分布数据或使用AI生成数据',
         builtWith: '基于React、Material-UI、Recharts和Tailwind CSS构建',
+        distributionGeneration: '分布数据生成器',
         // AI生成器相关
         aiGeneration: 'AI数据生成',
         promptLabel: '数据生成提示词',
@@ -164,6 +166,7 @@ function App() {
         noDataMessage: 'Please input data to start analysis',
         dataInputHint: 'You can upload files, generate distribution data, or use AI to generate data',
         builtWith: 'Built with React, Material-UI, Recharts and Tailwind CSS',
+        distributionGeneration: 'Distribution Data Generator',
         // AI Generator related
         aiGeneration: 'AI Data Generation',
         promptLabel: 'Data Generation Prompt',
@@ -223,6 +226,10 @@ function App() {
   const [currentAnalysisTab, setCurrentAnalysisTab] = useState<AnalysisTab>('stats');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // 全屏对话框引用
+  const fullscreenDialogRef = useRef<HTMLDivElement>(null);
 
   // 处理数据变化
   const handleDataChange = (newData: number[]) => {
@@ -309,9 +316,11 @@ function App() {
   const renderAnalysisComponent = () => {
     switch (currentAnalysisTab) {
       case 'stats':
-        return <BasicStatsAnalysis data={data} />;
+        return <BasicStatsAnalysis data={data} language={language} translations={translations[language]} />;
       case 'mlemom':
-        return <MLEMOMAnalysis data={data} />;
+        return <MLEMOMAnalysis data={data} language={language} translations={translations[language]} />;
+      case 'analysis':
+        return <APIDataAnalysis data={data} language={language} translations={translations[language]} />;
       case 'visualization':
         return <DataVisualization data={data} />;
       case 'teaching':
@@ -320,6 +329,25 @@ function App() {
         return null;
     }
   };
+
+  // 切换全屏模式
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // 全屏内容
+  const fullscreenContent = (
+    <Box sx={{ width: '100%', height: '100%', bgcolor: '#fafafa' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+        <Button onClick={toggleFullscreen} color="inherit">
+          退出全屏
+        </Button>
+      </Box>
+      <Box sx={{ p: 2, height: 'calc(100% - 80px)', overflow: 'auto' }}>
+        {renderAnalysisComponent()}
+      </Box>
+    </Box>
+  );
 
   // 渲染分析组件已整合到主返回函数中
 
@@ -377,18 +405,48 @@ function App() {
                     {translations[language].clearData}
                   </Button>
                 </div>
-                <Tabs 
-                  value={currentAnalysisTab} 
-                  onChange={(_, newValue) => setCurrentAnalysisTab(newValue as AnalysisTab)}
-                  variant="fullWidth"
-                  sx={{ mb: 3 }}
-                >
-                  <Tab label={translations[language].basicStats} value="stats" />
-                  <Tab label={translations[language].parameterEstimation} value="mlemom" />
-                  <Tab label={translations[language].dataVisualization} value="visualization" />
-                  <Tab label={translations[language].teachingResources} value="teaching" />
-                </Tabs>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Tabs 
+                    value={currentAnalysisTab} 
+                    onChange={(_, newValue) => setCurrentAnalysisTab(newValue as AnalysisTab)}
+                    variant="fullWidth"
+                    sx={{ flex: 1 }}
+                  >
+                    <Tab label={translations[language].basicStats} value="stats" />
+                    <Tab label={translations[language].parameterEstimation} value="mlemom" />
+                    <Tab label={language === 'zh' ? 'AI数据分析' : 'AI Data Analysis'} value="analysis" />
+                    <Tab label={translations[language].dataVisualization} value="visualization" />
+                    <Tab label={translations[language].teachingResources} value="teaching" />
+                  </Tabs>
+                  <Button
+                    onClick={toggleFullscreen}
+                    size="small"
+                    sx={{ ml: 2 }}
+                  >
+                    全屏
+                  </Button>
+                </Box>
                 {renderAnalysisComponent()}
+                
+                {/* 全屏对话框 */}
+                <Dialog
+                  ref={fullscreenDialogRef}
+                  open={isFullscreen}
+                  onClose={toggleFullscreen}
+                  fullWidth
+                  fullScreen
+                  PaperProps={{
+                    sx: {
+                      bgcolor: '#ffffff',
+                      overflow: 'hidden',
+                      height: '100vh'
+                    }
+                  }}
+                >
+                  <DialogContent sx={{ p: 0, height: '100vh', overflow: 'hidden' }}>
+                    {fullscreenContent}
+                  </DialogContent>
+                </Dialog>
               </>
             ) : (
               <div className="text-center py-12">

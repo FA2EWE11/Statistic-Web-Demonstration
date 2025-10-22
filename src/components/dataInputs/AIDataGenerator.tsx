@@ -37,7 +37,7 @@ export const AIDataGenerator: React.FC<AIDataGeneratorProps> = ({
 }) => {
   const [prompt, setPrompt] = useState<string>(language === 'zh' ? '生成100个符合正态分布的随机数，均值为0，标准差为1' : 'Generate 100 random numbers following normal distribution with mean 0 and standard deviation 1');
   const [apiKey, setApiKey] = useState<string>('');
-  const [useMockData, setUseMockData] = useState<boolean>(false);
+  const [useMockData, setUseMockData] = useState<boolean>(true);
   const [sampleSize, setSampleSize] = useState<number>(100);
 
   // 从AI响应中提取数字数据

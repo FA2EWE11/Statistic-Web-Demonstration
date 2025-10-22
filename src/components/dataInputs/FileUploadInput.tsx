@@ -2,11 +2,22 @@ import React, { useRef, useState } from 'react';
 import { Button, Typography, Box } from '@mui/material';
 import { CircularProgress } from '@mui/material';
 
+interface Translations {
+  fileUpload: string;
+  dropOrClick: string;
+  supportedFiles: string;
+  fileSizeLimit: string;
+  selectFile: string;
+  processing: string;
+}
+
 interface FileUploadInputProps {
   onDataChange: (data: number[]) => void;
   onError: (error: string) => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
+  language: 'zh' | 'en';
+  translations: Translations;
 }
 
 // 最大文件大小限制（10MB）
@@ -16,7 +27,9 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
   onDataChange,
   onError,
   loading,
-  setLoading
+  setLoading,
+  language,
+  translations
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string>('');
@@ -28,9 +41,9 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
 
     // 检查文件大小
     if (file.size > MAX_FILE_SIZE) {
-      onError('文件大小超过限制（最大10MB）');
-      return;
-    }
+        onError(language === 'zh' ? '文件大小超过限制（最大10MB）' : 'File size exceeds limit (max 10MB)');
+        return;
+      }
 
     setFileName(file.name);
     setLoading(true);
@@ -38,11 +51,11 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
     try {
       const data = await parseFile(file);
       if (data.length === 0) {
-        throw new Error('文件中未找到有效的数字数据');
+        throw new Error(language === 'zh' ? '文件中未找到有效的数字数据' : 'No valid numeric data found in file');
       }
       onDataChange(data);
     } catch (error) {
-      onError(error instanceof Error ? error.message : '文件解析失败');
+      onError(error instanceof Error ? error.message : (language === 'zh' ? '文件解析失败' : 'File parsing failed'));
     } finally {
       setLoading(false);
     }
@@ -56,7 +69,7 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
       
       // 对于Excel文件，显示提示信息（实际项目中可以使用xlsx库解析）
       if (fileExtension === 'xlsx' || fileExtension === 'xls') {
-        reject(new Error('Excel文件解析功能即将推出，请先使用CSV格式文件'));
+        reject(new Error(language === 'zh' ? 'Excel文件解析功能即将推出，请先使用CSV格式文件' : 'Excel file parsing coming soon, please use CSV format'));
         return;
       }
 
@@ -66,7 +79,7 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
         try {
           const content = e.target?.result as string;
           if (!content) {
-            reject(new Error('文件内容为空'));
+            reject(new Error(language === 'zh' ? '文件内容为空' : 'File content is empty'));
             return;
           }
 
@@ -108,18 +121,18 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
           });
 
           if (data.length === 0) {
-            reject(new Error('无法从文件中提取有效数字数据，请确保文件包含数值列'));
+            reject(new Error(language === 'zh' ? '无法从文件中提取有效数字数据，请确保文件包含数值列' : 'Could not extract valid numeric data from file'));
             return;
           }
 
           resolve(data);
         } catch (error) {
-          reject(new Error('文件解析错误'));
+          reject(new Error(language === 'zh' ? '文件解析错误' : 'File parsing error'));
         }
       };
 
       reader.onerror = () => {
-        reject(new Error('文件读取失败'));
+        reject(new Error(language === 'zh' ? '文件读取失败' : 'File reading failed'));
       };
 
       reader.readAsText(file);
@@ -174,21 +187,21 @@ export const FileUploadInput: React.FC<FileUploadInputProps> = ({
         {loading ? (
           <Box className="loading-indicator">
             <CircularProgress />
-            <Typography sx={{ mt: 2 }}>处理中...</Typography>
+            <Typography sx={{ mt: 2 }}>{translations.processing}</Typography>
           </Box>
         ) : (
           <>
             <Typography variant="h6" gutterBottom>
-              {fileName || '拖拽文件到此处或点击上传'}
+              {fileName || translations.dropOrClick}
             </Typography>
             <Typography color="textSecondary" sx={{ mb: 2 }}>
-              支持CSV、文本文件和Excel文件
+              {translations.supportedFiles}
             </Typography>
             <Typography variant="caption" color="textSecondary" sx={{ mb: 2, display: 'block' }}>
-              最大文件大小：10MB | 第一行将被视为列标题
+              {translations.fileSizeLimit}
             </Typography>
             <Button variant="contained" color="primary">
-              选择文件
+              {translations.selectFile}
             </Button>
           </>
         )}

@@ -4,45 +4,36 @@ import { FormControl, InputLabel, Select, MenuItem, TextField, Button, Typograph
 
 interface Translations {
   distributionGeneration: string;
-  selectDistribution: string;
-  normal: string;
-  uniform: string;
-  exponential: string;
-  poisson: string;
-  binomial: string;
-  gamma: string;
-  beta: string;
+  distributionType: string;
+  normalDistribution: string;
+  uniformDistribution: string;
+  exponentialDistribution: string;
+  poissonDistribution: string;
+  binomialDistribution: string;
+  gammaDistribution: string;
+  betaDistribution: string;
   sampleSize: string;
   mean: string;
-  stdDev: string;
+  std: string;
   min: string;
   max: string;
-  rate: string;
   lambda: string;
+  rate: string;
   trials: string;
   probability: string;
   shape: string;
   scale: string;
   alpha: string;
-  betaParam: string;
+  beta: string;
   generateData: string;
   generating: string;
-  stdDevHelper: string;
-  rateHelper: string;
-  lambdaHelper: string;
-  trialsHelper: string;
-  probabilityHelper: string;
-  shapeHelper: string;
-  scaleHelper: string;
-  alphaHelper: string;
-  betaParamHelper: string;
-  normalParamsTitle: string;
-  uniformParamsTitle: string;
-  exponentialParamsTitle: string;
-  poissonParamsTitle: string;
-  binomialParamsTitle: string;
-  gammaParamsTitle: string;
-  betaParamsTitle: string;
+  normalParams: string;
+  uniformParams: string;
+  exponentialParams: string;
+  poissonParams: string;
+  binomialParams: string;
+  gammaParams: string;
+  betaParams: string;
 }
 
 interface DistributionGeneratorProps {
@@ -61,45 +52,36 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
   language = 'zh',
   translations = {
     distributionGeneration: '分布数据生成器',
-    selectDistribution: '分布类型',
-    normal: '正态分布',
-    uniform: '均匀分布',
-    exponential: '指数分布',
-    poisson: '泊松分布',
-    binomial: '二项分布',
-    gamma: '伽马分布',
-    beta: '贝塔分布',
+    distributionType: '分布类型',
+    normalDistribution: '正态分布',
+    uniformDistribution: '均匀分布',
+    exponentialDistribution: '指数分布',
+    poissonDistribution: '泊松分布',
+    binomialDistribution: '二项分布',
+    gammaDistribution: '伽马分布',
+    betaDistribution: '贝塔分布',
     sampleSize: '样本大小 (10-1000)',
     mean: '均值 (μ)',
-    stdDev: '标准差 (σ)',
+    std: '标准差 (σ)',
     min: '最小值',
     max: '最大值',
-    rate: 'λ参数',
-    lambda: '速率参数 (λ)',
+    lambda: 'λ参数',
+    rate: '速率参数 (λ)',
     trials: '试验次数',
     probability: '成功概率',
     shape: '形状参数 (k)',
     scale: '尺度参数 (θ)',
     alpha: 'α参数',
-    betaParam: 'β参数',
+    beta: 'β参数',
     generateData: '生成数据',
     generating: '生成中...',
-    stdDevHelper: '标准差必须大于0',
-    rateHelper: 'λ参数必须大于0',
-    lambdaHelper: '速率参数必须大于0',
-    trialsHelper: '试验次数必须大于0',
-    probabilityHelper: '概率必须在0到1之间',
-    shapeHelper: '形状参数必须大于0',
-    scaleHelper: '尺度参数必须大于0',
-    alphaHelper: 'α参数必须大于0',
-    betaParamHelper: 'β参数必须大于0',
-    normalParamsTitle: '正态分布参数',
-    uniformParamsTitle: '均匀分布参数',
-    exponentialParamsTitle: '指数分布参数',
-    poissonParamsTitle: '泊松分布参数',
-    binomialParamsTitle: '二项分布参数',
-    gammaParamsTitle: '伽马分布参数',
-    betaParamsTitle: '贝塔分布参数'
+    normalParams: '正态分布参数',
+    uniformParams: '均匀分布参数',
+    exponentialParams: '指数分布参数',
+    poissonParams: '泊松分布参数',
+    binomialParams: '二项分布参数',
+    gammaParams: '伽马分布参数',
+    betaParams: '贝塔分布参数'
   }
 }) => {
   const [distribution, setDistribution] = useState<DistributionType>('normal');
@@ -234,56 +216,56 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
       let data: number[] = [];
 
       if (sampleSize < 10 || sampleSize > 1000) {
-        onError('样本大小必须在10到1000之间');
+        onError(language === 'zh' ? '样本大小必须在10到1000之间' : 'Sample size must be between 10 and 1000');
         return;
       }
 
       switch (distribution) {
         case 'normal':
           if (params.std <= 0) {
-            onError('标准差必须大于0');
+            onError(language === 'zh' ? '标准差必须大于0' : 'Standard deviation must be greater than 0');
             return;
           }
           data = generateNormalData(params.mean, params.std, sampleSize);
           break;
         case 'uniform':
           if (params.max <= params.min) {
-            onError('最大值必须大于最小值');
+            onError(language === 'zh' ? '最大值必须大于最小值' : 'Maximum value must be greater than minimum value');
             return;
           }
           data = generateUniformData(params.min, params.max, sampleSize);
           break;
         case 'exponential':
           if (params.lambda <= 0) {
-            onError('λ参数必须大于0');
+            onError(language === 'zh' ? 'λ参数必须大于0' : 'λ parameter must be greater than 0');
             return;
           }
           data = generateExponentialData(params.lambda, sampleSize);
           break;
         case 'poisson':
           if (params.rate <= 0) {
-            onError('速率参数必须大于0');
+            onError(language === 'zh' ? '速率参数必须大于0' : 'Rate parameter must be greater than 0');
             return;
           }
           data = generatePoissonData(params.rate, sampleSize);
           break;
         case 'binomial':
           if (params.trials <= 0 || params.probability < 0 || params.probability > 1) {
-            onError('试验次数必须大于0，概率必须在0到1之间');
+            onError(language === 'zh' ? '试验次数必须大于0，概率必须在0到1之间' : 'Number of trials must be greater than 0, probability must be between 0 and 1');
             return;
           }
           data = generateBinomialData(params.trials, params.probability, sampleSize);
           break;
         case 'gamma':
           if (params.shape <= 0 || params.scale <= 0) {
-            onError('形状参数和尺度参数必须大于0');
+            onError(language === 'zh' ? '形状参数和尺度参数必须大于0' : 'Shape parameter and scale parameter must be greater than 0');
             return;
           }
           data = generateGammaData(params.shape, params.scale, sampleSize);
           break;
         case 'beta':
           if (params.alpha <= 0 || params.beta <= 0) {
-            onError('α和β参数必须大于0');
+            onError(language === 'zh' ? 'α和β参数必须大于0' : 'α and β parameters must be greater than 0');
             return;
           }
           data = generateBetaData(params.alpha, params.beta, sampleSize);
@@ -292,7 +274,7 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
 
       onDataChange(data);
     } catch (error) {
-      onError(error instanceof Error ? error.message : '数据生成失败');
+      onError(error instanceof Error ? error.message : (language === 'zh' ? '数据生成失败' : 'Data generation failed'));
     }
   };
 
@@ -315,12 +297,12 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
             <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%' } }}>
               <TextField
                 fullWidth
-                label={translations.stdDev}
+                label={translations.std}
                 type="number"
                 value={params.std}
                 onChange={(e) => handleParamChange('std', parseFloat(e.target.value) || 1)}
                 variant="outlined"
-                helperText={translations.stdDevHelper}
+                helperText={language === 'zh' ? "标准差必须大于0" : "Standard deviation must be greater than 0"}
                 error={params.std <= 0}
                 inputProps={{ min: 0.01 }}
               />
@@ -358,12 +340,12 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
         return (
           <TextField
             fullWidth
-            label={translations.rate}
+            label={translations.lambda}
             type="number"
             value={params.lambda}
             onChange={(e) => handleParamChange('lambda', parseFloat(e.target.value) || 1)}
             variant="outlined"
-            helperText={translations.rateHelper}
+            helperText={language === 'zh' ? "λ参数必须大于0" : "λ parameter must be greater than 0"}
             error={params.lambda <= 0}
             inputProps={{ min: 0.01 }}
           />
@@ -372,12 +354,12 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
           return (
             <TextField
               fullWidth
-              label={translations.lambda}
+              label={translations.rate}
               type="number"
               value={params.rate}
               onChange={(e) => handleParamChange('rate', parseFloat(e.target.value) || 1)}
               variant="outlined"
-              helperText={translations.lambdaHelper}
+              helperText={language === 'zh' ? "速率参数必须大于0" : "Rate parameter must be greater than 0"}
               error={params.rate <= 0}
               inputProps={{ min: 0.01 }}
             />
@@ -393,7 +375,7 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
                   value={params.trials}
                   onChange={(e) => handleParamChange('trials', parseFloat(e.target.value) || 10)}
                   variant="outlined"
-                  helperText={translations.trialsHelper}
+                  helperText={language === 'zh' ? "试验次数必须大于0" : "Number of trials must be greater than 0"}
                   error={params.trials <= 0}
                   inputProps={{ min: 1 }}
                 />
@@ -406,7 +388,7 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
                   value={params.probability}
                   onChange={(e) => handleParamChange('probability', parseFloat(e.target.value) || 0.5)}
                   variant="outlined"
-                  helperText={translations.probabilityHelper}
+                  helperText={language === 'zh' ? "概率必须在0到1之间" : "Probability must be between 0 and 1"}
                   error={params.probability < 0 || params.probability > 1}
                   inputProps={{ min: 0, max: 1, step: 0.01 }}
                 />
@@ -424,7 +406,7 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
                   value={params.shape}
                   onChange={(e) => handleParamChange('shape', parseFloat(e.target.value) || 2)}
                   variant="outlined"
-                  helperText={translations.shapeHelper}
+                  helperText={language === 'zh' ? "形状参数必须大于0" : "Shape parameter must be greater than 0"}
                   error={params.shape <= 0}
                   inputProps={{ min: 0.01 }}
                 />
@@ -437,7 +419,7 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
                   value={params.scale}
                   onChange={(e) => handleParamChange('scale', parseFloat(e.target.value) || 1)}
                   variant="outlined"
-                  helperText={translations.scaleHelper}
+                  helperText={language === 'zh' ? "尺度参数必须大于0" : "Scale parameter must be greater than 0"}
                   error={params.scale <= 0}
                   inputProps={{ min: 0.01 }}
                 />
@@ -455,7 +437,7 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
                   value={params.alpha}
                   onChange={(e) => handleParamChange('alpha', parseFloat(e.target.value) || 2)}
                   variant="outlined"
-                  helperText={translations.alphaHelper}
+                  helperText={language === 'zh' ? "α参数必须大于0" : "α parameter must be greater than 0"}
                   error={params.alpha <= 0}
                   inputProps={{ min: 0.01 }}
                 />
@@ -463,12 +445,12 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
               <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%' } }}>
                 <TextField
                   fullWidth
-                  label={translations.betaParam}
+                  label={translations.beta}
                   type="number"
                   value={params.beta}
                   onChange={(e) => handleParamChange('beta', parseFloat(e.target.value) || 2)}
                   variant="outlined"
-                  helperText={translations.betaParamHelper}
+                  helperText={language === 'zh' ? "β参数必须大于0" : "β parameter must be greater than 0"}
                   error={params.beta <= 0}
                   inputProps={{ min: 0.01 }}
                 />
@@ -488,10 +470,10 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, flexWrap: 'wrap' }}>
           <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%' } }}>
             <FormControl fullWidth variant="outlined" sx={{ '& .MuiInputBase-root': { height: '56px' }, '& .MuiSelect-select': { fontSize: '1rem', py: 2 } }}>
-              <InputLabel sx={{ fontSize: '1rem' }}>{translations.selectDistribution}</InputLabel>
+              <InputLabel sx={{ fontSize: '1rem' }}>{translations.distributionType}</InputLabel>
               <Select
                 value={distribution}
-                label={translations.selectDistribution}
+                label={translations.distributionType}
                 onChange={(e) => setDistribution(e.target.value as DistributionType)}
                 sx={{ fontSize: '1rem' }}
                 MenuProps={{
@@ -502,13 +484,13 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
                   },
                 }}
               >
-                <MenuItem value="normal">{translations.normal}</MenuItem>
-                <MenuItem value="uniform">{translations.uniform}</MenuItem>
-                <MenuItem value="exponential">{translations.exponential}</MenuItem>
-                <MenuItem value="poisson">{translations.poisson}</MenuItem>
-                <MenuItem value="binomial">{translations.binomial}</MenuItem>
-                <MenuItem value="gamma">{translations.gamma}</MenuItem>
-                <MenuItem value="beta">{translations.beta}</MenuItem>
+                <MenuItem value="normal">{translations.normalDistribution}</MenuItem>
+                <MenuItem value="uniform">{translations.uniformDistribution}</MenuItem>
+                <MenuItem value="exponential">{translations.exponentialDistribution}</MenuItem>
+                <MenuItem value="poisson">{translations.poissonDistribution}</MenuItem>
+                <MenuItem value="binomial">{translations.binomialDistribution}</MenuItem>
+                <MenuItem value="gamma">{translations.gammaDistribution}</MenuItem>
+                <MenuItem value="beta">{translations.betaDistribution}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -527,13 +509,13 @@ export const DistributionGenerator: React.FC<DistributionGeneratorProps> = ({
 
       <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" gutterBottom>
-            {distribution === 'normal' && translations.normalParamsTitle}
-            {distribution === 'uniform' && translations.uniformParamsTitle}
-            {distribution === 'exponential' && translations.exponentialParamsTitle}
-            {distribution === 'poisson' && translations.poissonParamsTitle}
-            {distribution === 'binomial' && translations.binomialParamsTitle}
-            {distribution === 'gamma' && translations.gammaParamsTitle}
-            {distribution === 'beta' && translations.betaParamsTitle}
+            {distribution === 'normal' && translations.normalParams}
+            {distribution === 'uniform' && translations.uniformParams}
+            {distribution === 'exponential' && translations.exponentialParams}
+            {distribution === 'poisson' && translations.poissonParams}
+            {distribution === 'binomial' && translations.binomialParams}
+            {distribution === 'gamma' && translations.gammaParams}
+            {distribution === 'beta' && translations.betaParams}
           </Typography>
         {renderParamInputs()}
       </Box>

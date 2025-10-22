@@ -3,6 +3,10 @@ import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Table, Tabl
 
 interface MLEMOMAnalysisProps {
   data: number[];
+  language: 'zh' | 'en';
+  translations: {
+    [key: string]: string;
+  };
 }
 
 type DistributionType = 'normal' | 'uniform' | 'exponential' | 'poisson' | 'binomial' | 'gamma' | 'beta';
@@ -22,7 +26,7 @@ interface DistributionEstimator {
   estimateMOM: (data: number[]) => Record<string, number>;
 }
 
-const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
+const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data, language }) => {
   const [distributionType, setDistributionType] = useState<DistributionType>('normal');
 
   // 计算二项分布的MLE估计（假设数据在合理范围内）
@@ -97,8 +101,8 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
   // 分布估计器配置
   const distributionEstimators: Record<DistributionType, DistributionEstimator> = {
     normal: {
-      name: '正态分布 N(μ, σ²)',
-      parameters: ['μ (均值)', 'σ² (方差)', 'σ (标准差)'],
+      name: language === 'zh' ? '正态分布 N(μ, σ²)' : 'Normal Distribution N(μ, σ²)',
+      parameters: language === 'zh' ? ['μ (均值)', 'σ² (方差)', 'σ (标准差)'] : ['μ (Mean)', 'σ² (Variance)', 'σ (Standard Deviation)'],
       estimateMLE: (data: number[]) => {
         const n = data.length;
         const mean = data.reduce((sum, val) => sum + val, 0) / n;
@@ -121,8 +125,8 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
       }
     },
     uniform: {
-      name: '均匀分布 U(a, b)',
-      parameters: ['a (下限)', 'b (上限)', '均值 (a+b)/2'],
+      name: language === 'zh' ? '均匀分布 U(a, b)' : 'Uniform Distribution U(a, b)',
+      parameters: language === 'zh' ? ['a (下限)', 'b (上限)', '均值 (a+b)/2'] : ['a (Lower Bound)', 'b (Upper Bound)', 'Mean (a+b)/2'],
       estimateMLE: (data: number[]) => {
         const min = Math.min(...data);
         const max = Math.max(...data);
@@ -151,8 +155,8 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
       }
     },
     exponential: {
-      name: '指数分布 Exp(λ)',
-      parameters: ['λ (速率参数)', '均值 1/λ', '方差 1/λ²'],
+      name: language === 'zh' ? '指数分布 Exp(λ)' : 'Exponential Distribution Exp(λ)',
+      parameters: language === 'zh' ? ['λ (速率参数)', '均值 1/λ', '方差 1/λ²'] : ['λ (Rate Parameter)', 'Mean 1/λ', 'Variance 1/λ²'],
       estimateMLE: (data: number[]) => {
         const n = data.length;
         const mean = data.reduce((sum, val) => sum + val, 0) / n;
@@ -175,26 +179,26 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
       }
     },
     binomial: {
-      name: '二项分布 Binomial(n,p)',
-      parameters: ['n (试验次数)', 'p (成功概率)'],
+      name: language === 'zh' ? '二项分布 Binomial(n,p)' : 'Binomial Distribution Binomial(n,p)',
+      parameters: language === 'zh' ? ['n (试验次数)', 'p (成功概率)'] : ['n (Number of Trials)', 'p (Success Probability)'],
       estimateMLE: calculateBinomialMLE,
       estimateMOM: calculateBinomialMOM
     },
     gamma: {
-      name: '伽马分布 Gamma(k,θ)',
-      parameters: ['k (形状参数)', 'θ (率参数)', 'scale (尺度参数)'],
+      name: language === 'zh' ? '伽马分布 Gamma(k,θ)' : 'Gamma Distribution Gamma(k,θ)',
+      parameters: language === 'zh' ? ['k (形状参数)', 'θ (率参数)', 'scale (尺度参数)'] : ['k (Shape Parameter)', 'θ (Rate Parameter)', 'scale (Scale Parameter)'],
       estimateMLE: calculateGammaMLE,
       estimateMOM: calculateGammaMOM
     },
     beta: {
-      name: '贝塔分布 Beta(α,β)',
-      parameters: ['α (形状参数)', 'β (形状参数)', '数据最小值', '数据最大值'],
+      name: language === 'zh' ? '贝塔分布 Beta(α,β)' : 'Beta Distribution Beta(α,β)',
+      parameters: language === 'zh' ? ['α (形状参数)', 'β (形状参数)', '数据最小值', '数据最大值'] : ['α (Shape Parameter)', 'β (Shape Parameter)', 'Data Minimum', 'Data Maximum'],
       estimateMLE: calculateBetaMLE,
       estimateMOM: calculateBetaMOM
     },
     poisson: {
-      name: '泊松分布 Poisson(λ)',
-      parameters: ['λ (速率参数)', '均值 λ', '方差 λ'],
+      name: language === 'zh' ? '泊松分布 Poisson(λ)' : 'Poisson Distribution Poisson(λ)',
+      parameters: language === 'zh' ? ['λ (速率参数)', '均值 λ', '方差 λ'] : ['λ (Rate Parameter)', 'Mean λ', 'Variance λ'],
       estimateMLE: (data: number[]) => {
         const n = data.length;
         const mean = data.reduce((sum, val) => sum + val, 0) / n;
@@ -225,7 +229,7 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
     const momParams = estimator.estimateMOM(data);
 
     // 将参数映射到对应的结果
-    const paramMap: Record<string, keyof typeof mleParams> = {
+    const paramMap: Record<string, keyof typeof mleParams> = language === 'zh' ? {
       'μ (均值)': 'mean',
       'σ² (方差)': 'variance',
       'σ (标准差)': 'std',
@@ -236,7 +240,37 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
       '均值 1/λ': 'mean',
       '方差 1/λ²': 'variance',
       '均值 λ': 'mean',
-      '方差 λ': 'variance'
+      '方差 λ': 'variance',
+      'n (试验次数)': 'n',
+      'p (成功概率)': 'p',
+      'k (形状参数)': 'shape',
+      'θ (率参数)': 'rate',
+      'scale (尺度参数)': 'scale',
+      'α (形状参数)': 'alpha',
+      'β (形状参数)': 'beta',
+      '数据最小值': 'min',
+      '数据最大值': 'max'
+    } : {
+      'μ (Mean)': 'mean',
+      'σ² (Variance)': 'variance',
+      'σ (Standard Deviation)': 'std',
+      'a (Lower Bound)': 'a',
+      'b (Upper Bound)': 'b',
+      'Mean (a+b)/2': 'mean',
+      'λ (Rate Parameter)': 'lambda',
+      'Mean 1/λ': 'mean',
+      'Variance 1/λ²': 'variance',
+      'Mean λ': 'mean',
+      'Variance λ': 'variance',
+      'n (Number of Trials)': 'n',
+      'p (Success Probability)': 'p',
+      'k (Shape Parameter)': 'shape',
+      'θ (Rate Parameter)': 'rate',
+      'scale (Scale Parameter)': 'scale',
+      'α (Shape Parameter)': 'alpha',
+      'β (Shape Parameter)': 'beta',
+      'Data Minimum': 'min',
+      'Data Maximum': 'max'
     };
 
     return estimator.parameters.map(param => {
@@ -268,22 +302,35 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
 
     const maxUnitDiff = Math.max(...estimationResults.map(r => r.unitDifference));
     
-    if (maxUnitDiff < 0.1) {
-      return 'MLE和MoM估计结果几乎完全一致，说明数据很好地符合所选分布。';
-    } else if (maxUnitDiff < 5) {
-      return 'MLE和MoM估计结果非常接近，差异在可接受范围内。';
-    } else if (maxUnitDiff < 20) {
-      return 'MLE和MoM估计结果存在一定差异，可能需要考虑数据是否完全符合所选分布。';
+    if (language === 'zh') {
+      if (maxUnitDiff < 0.1) {
+        return 'MLE和MoM估计结果几乎完全一致，说明数据很好地符合所选分布。';
+      } else if (maxUnitDiff < 5) {
+        return 'MLE和MoM估计结果非常接近，差异在可接受范围内。';
+      } else if (maxUnitDiff < 20) {
+        return 'MLE和MoM估计结果存在一定差异，可能需要考虑数据是否完全符合所选分布。';
+      } else {
+        return 'MLE和MoM估计结果差异较大，建议检查数据分布或尝试其他分布模型。';
+      }
     } else {
-      return 'MLE和MoM估计结果差异较大，建议检查数据分布或尝试其他分布模型。';
+      if (maxUnitDiff < 0.1) {
+        return 'MLE and MoM estimates are almost identical, indicating the data fits the selected distribution well.';
+      } else if (maxUnitDiff < 5) {
+        return 'MLE and MoM estimates are very close, with differences within acceptable range.';
+      } else if (maxUnitDiff < 20) {
+        return 'There are some differences between MLE and MoM estimates; consider whether the data fully conforms to the selected distribution.';
+      } else {
+        return 'MLE and MoM estimates show significant differences; suggest checking the data distribution or trying other distribution models.';
+      }
     }
   };
 
   if (data.length === 0) {
+    const noDataMessage = language === 'zh' ? '请先输入或生成数据以查看参数估计结果' : 'Please input or generate data to view parameter estimation results';
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <Typography variant="h6" color="textSecondary">
-          请先输入或生成数据以查看参数估计结果
+          {noDataMessage}
         </Typography>
       </Box>
     );
@@ -292,32 +339,32 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h6" gutterBottom>
-        最大似然估计(MLE)和矩估计(MoM)分析
+        {language === 'zh' ? '最大似然估计(MLE)和矩估计(MoM)分析' : 'Maximum Likelihood Estimation (MLE) and Method of Moments (MoM) Analysis'}
       </Typography>
 
       <FormControl fullWidth sx={{ mb: 4 }}>
-        <InputLabel>选择分布类型</InputLabel>
+        <InputLabel>{language === 'zh' ? '选择分布类型' : 'Select Distribution Type'}</InputLabel>
         <Select
           value={distributionType}
-          label="选择分布类型"
+          label={language === 'zh' ? '选择分布类型' : 'Select Distribution Type'}
           onChange={(e) => setDistributionType(e.target.value as DistributionType)}
         >
-          <MenuItem value="normal">正态分布 N(μ, σ²)</MenuItem>
-          <MenuItem value="uniform">均匀分布 U(a, b)</MenuItem>
-          <MenuItem value="exponential">指数分布 Exp(λ)</MenuItem>
-          <MenuItem value="poisson">泊松分布 Poisson(λ)</MenuItem>
-          <MenuItem value="binomial">二项分布 Binomial(n,p)</MenuItem>
-          <MenuItem value="gamma">伽马分布 Gamma(k,θ)</MenuItem>
-          <MenuItem value="beta">贝塔分布 Beta(α,β)</MenuItem>
+          <MenuItem value="normal">{language === 'zh' ? '正态分布 N(μ, σ²)' : 'Normal Distribution N(μ, σ²)'}</MenuItem>
+          <MenuItem value="uniform">{language === 'zh' ? '均匀分布 U(a, b)' : 'Uniform Distribution U(a, b)'}</MenuItem>
+          <MenuItem value="exponential">{language === 'zh' ? '指数分布 Exp(λ)' : 'Exponential Distribution Exp(λ)'}</MenuItem>
+          <MenuItem value="poisson">{language === 'zh' ? '泊松分布 Poisson(λ)' : 'Poisson Distribution Poisson(λ)'}</MenuItem>
+          <MenuItem value="binomial">{language === 'zh' ? '二项分布 Binomial(n,p)' : 'Binomial Distribution Binomial(n,p)'}</MenuItem>
+          <MenuItem value="gamma">{language === 'zh' ? '伽马分布 Gamma(k,θ)' : 'Gamma Distribution Gamma(k,θ)'}</MenuItem>
+          <MenuItem value="beta">{language === 'zh' ? '贝塔分布 Beta(α,β)' : 'Beta Distribution Beta(α,β)'}</MenuItem>
         </Select>
       </FormControl>
 
       <Alert severity="info" sx={{ mb: 4 }}>
         <Typography variant="subtitle2" gutterBottom>
-          当前估计分布: {distributionEstimators[distributionType].name}
+          {language === 'zh' ? '当前估计分布: ' : 'Current Estimated Distribution: '}{distributionEstimators[distributionType].name}
         </Typography>
         <Typography variant="body2">
-          样本量: {data.length}
+          {language === 'zh' ? '样本量: ' : 'Sample Size: '}{data.length}
         </Typography>
       </Alert>
       
@@ -326,8 +373,10 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
       {distributionType === 'binomial' && (
         <Alert severity="warning" sx={{ mb: 4 }}>
           <Typography variant="body2">
-            注：对于二项分布，我们假设数据表示成功次数，并根据数据最大值估计试验次数n。
-            实际应用中，n通常是已知的试验次数。
+            {language === 'zh' 
+              ? '注：对于二项分布，我们假设数据表示成功次数，并根据数据最大值估计试验次数n。实际应用中，n通常是已知的试验次数。' 
+              : 'Note: For binomial distribution, we assume the data represents the number of successes, and estimate the number of trials n based on the maximum value in the data. In practical applications, n is usually a known number of trials.'
+            }
           </Typography>
         </Alert>
       )}
@@ -335,8 +384,10 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
       {distributionType === 'beta' && (
         <Alert severity="warning" sx={{ mb: 4 }}>
           <Typography variant="body2">
-            注：对于贝塔分布，数据已被标准化到[0,1]范围进行参数估计。
-            结果中显示了原始数据的最小值和最大值作为参考。
+            {language === 'zh' 
+              ? '注：对于贝塔分布，数据已被标准化到[0,1]范围进行参数估计。结果中显示了原始数据的最小值和最大值作为参考。' 
+              : 'Note: For beta distribution, the data has been normalized to the [0,1] range for parameter estimation. The results show the minimum and maximum values of the original data for reference.'
+            }
           </Typography>
         </Alert>
       )}
@@ -345,12 +396,12 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-              <TableCell>参数</TableCell>
-              <TableCell align="right">最大似然估计 (MLE)</TableCell>
-              <TableCell align="right">矩估计 (MoM)</TableCell>
-              <TableCell align="right">绝对差异</TableCell>
-              <TableCell align="right">相对差异 (%)</TableCell>
-            </TableRow>
+                  <TableCell>{language === 'zh' ? '参数' : 'Parameter'}</TableCell>
+                  <TableCell align="right">{language === 'zh' ? '最大似然估计 (MLE)' : 'Maximum Likelihood Estimation (MLE)'}</TableCell>
+                  <TableCell align="right">{language === 'zh' ? '矩估计 (MoM)' : 'Method of Moments (MoM)'}</TableCell>
+                  <TableCell align="right">{language === 'zh' ? '绝对差异' : 'Absolute Difference'}</TableCell>
+                  <TableCell align="right">{language === 'zh' ? '相对差异 (%)' : 'Relative Difference (%)'}</TableCell>
+                </TableRow>
           </TableHead>
           <TableBody>
             {estimationResults.map((result) => (
@@ -370,23 +421,23 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
 
       <Box sx={{ mt: 4, p: 3, backgroundColor: '#fafafa', borderRadius: 2 }}>
         <Typography variant="subtitle1" gutterBottom>
-          估计方法比较分析
+          {language === 'zh' ? '估计方法比较分析' : 'Estimation Method Comparison Analysis'}
         </Typography>
         <Typography variant="body2" gutterBottom>
           {analyzeDifference()}
         </Typography>
         <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
-          技术说明:
+          {language === 'zh' ? '技术说明:' : 'Technical Notes:'}
         </Typography>
         <Box sx={{ ml: 2 }}>
           <Typography variant="body2" gutterBottom>
-            • 最大似然估计 (MLE): 寻找使观测数据出现概率最大的参数值
+            • {language === 'zh' ? '最大似然估计 (MLE): 寻找使观测数据出现概率最大的参数值' : 'Maximum Likelihood Estimation (MLE): Finds parameter values that maximize the probability of observed data'}
           </Typography>
           <Typography variant="body2" gutterBottom>
-            • 矩估计 (MoM): 通过匹配样本矩和理论矩来估计参数
+            • {language === 'zh' ? '矩估计 (MoM): 通过匹配样本矩和理论矩来估计参数' : 'Method of Moments (MoM): Estimates parameters by matching sample moments with theoretical moments'}
           </Typography>
           <Typography variant="body2">
-            • 对于正态分布，MLE和MoM给出相同的估计结果
+            • {language === 'zh' ? '对于正态分布，MLE和MoM给出相同的估计结果' : 'For normal distribution, MLE and MoM yield the same estimation results'}
           </Typography>
         </Box>
       </Box>
@@ -395,26 +446,26 @@ const MLEMOMAnalysis: React.FC<MLEMOMAnalysisProps> = ({ data }) => {
         <Box sx={{ flex: 1 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="subtitle1" gutterBottom color="primary">
-              MLE优势
+              {language === 'zh' ? 'MLE优势' : 'MLE Advantages'}
             </Typography>
             <ul>
-              <li>渐近有效性，大样本下方差最小</li>
-              <li>充分利用了分布的概率结构</li>
-              <li>一致性，样本量增大时趋近于真实值</li>
-              <li>对于复杂分布（如伽马、贝塔）通常更准确</li>
+              <li>{language === 'zh' ? '渐近有效性，大样本下方差最小' : 'Asymptotic efficiency, minimum variance for large samples'}</li>
+              <li>{language === 'zh' ? '充分利用了分布的概率结构' : 'Fully utilizes the probability structure of the distribution'}</li>
+              <li>{language === 'zh' ? '一致性，样本量增大时趋近于真实值' : 'Consistency, approaches the true value as sample size increases'}</li>
+              <li>{language === 'zh' ? '对于复杂分布（如伽马、贝塔）通常更准确' : 'Usually more accurate for complex distributions (e.g., gamma, beta)'}</li>
             </ul>
           </Paper>
         </Box>
         <Box sx={{ flex: 1 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="subtitle1" gutterBottom color="secondary">
-              MoM优势
+              {language === 'zh' ? 'MoM优势' : 'MoM Advantages'}
             </Typography>
             <ul>
-              <li>计算简单直观</li>
-              <li>不依赖于分布的具体形式</li>
-              <li>在小样本下可能表现更稳健</li>
-              <li>对于二项分布，结果与MLE相同</li>
+              <li>{language === 'zh' ? '计算简单直观' : 'Simple and intuitive calculation'}</li>
+              <li>{language === 'zh' ? '不依赖于分布的具体形式' : 'Does not depend on the specific form of the distribution'}</li>
+              <li>{language === 'zh' ? '在小样本下可能表现更稳健' : 'May perform more robustly with small samples'}</li>
+              <li>{language === 'zh' ? '对于二项分布，结果与MLE相同' : 'For binomial distribution, results are the same as MLE'}</li>
             </ul>
           </Paper>
         </Box>
